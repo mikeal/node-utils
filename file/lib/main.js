@@ -86,10 +86,10 @@ exports.walk = function (start, callback) {
           return acc;
         }, {"names": [], "dirs": []});
 
-        callback(start, coll.dirs, coll.names);
+        return callback(null, start, coll.dirs, coll.names);
       });
     } else {
-      return null;
+      return callback(new Error("path: " + start + " is not a directory"));
     }
   });
 };
@@ -120,7 +120,7 @@ exports.walkSync = function (start, callback) {
     });
 
   } else {
-    return null;
+    throw new Error("path: " + start + " is not a directory");
   }
 };
 
