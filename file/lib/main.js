@@ -19,8 +19,9 @@ exports.mkdirs = function (_path, mode, callback) {
           // file does not exist
           if (err.errno == 2) {
             fs.mkdir(dir, m, function (erro) {
-              if (erro) {
-                return cb(new Error("Failed to make " + dir + "\n"));
+              if (erro && erro.errno != 17) {
+                sys.p(erro);
+                return cb(new Error("Failed to make " + dir + "\n" + erro));
               } else {
                 return walk(ds, acc, m, cb);
               }
