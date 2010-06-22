@@ -43,6 +43,13 @@ function createMultiPump(readables, writables) {
   
   for (var i;i<readables.length;i+=1) {
     readables[i].pumps = [];
+    if (i !== 0) {
+      var readable = readables[i];
+      readable.writers = 0;
+      readable.pause();
+      readable.buffers = []
+      readable.bufferListener = function (chunk) { readable.buffers.push(chunk); }
+    }
   }
   
   var startPump = function (writable) {
@@ -51,6 +58,12 @@ function createMultiPump(readables, writables) {
       return;
     }
     var readable = readables[writable.readableIndex]
+    readable.resume();
+    if (readable.writers) {
+      readable.writers += 1;
+      readable.buffers.forEach(function(chunk){writable.write(chunk)});
+      if (readable.writers == writables.length) readable.removeListener("data", readable.bufferListener);
+    }
     var pump = createPump(readable, writable);
     readable.pumps.push(pump);
     pump.removeDefaults();
@@ -85,3 +98,5 @@ function createMultiPump(readables, writables) {
   return mpump;
 }
 
+exports.createPump = createPump;
+exports.createMultiPump = createMultiPump;
