@@ -1,44 +1,51 @@
 var sys = require('sys')
   , events = require('events');
 
-function createPump (readable, writable) {
-  var pump = new events.EventEmitter();
-  readable.addListener("data", function (chunk) {
-    pump.chunk = chunk;
-    pump.emit("data", chunk);
-    if (writable.write(pump.chunk) === false) {
-      pump.emit("pause");
-    }
-    pump.chunk = null;
-  });
-  readable.addListener("drain", function () {
-    pump.emit("drain");
-    pump.emit("resume");
-  });
-  readable.addListener("end", function () {
-    pump.emit("end");
-  });
-  writable.addListener("close", function () {
-    pump.emit("close");
-  });
-  
-  pump.pauseListener = function () {readable.pause()};
-  pump.addListener("pause", pump.pauseListener);
-  pump.resumeListener = function () {readable.resume()};
-  pump.addListener("resume", pump.resumeListener);
-  pump.endListener = function () {writable.end()};
-  pump.addListener("end", pump.endListener);
-  
-  pump.removeDefaults = function ( ) {
-    pump.removeListener("pause", pump.pauseListener);
-    pump.removeListener("resume", pump.resumeListener);
-    pump.removeListener("end", pump.endListener);
-  }
-  
-  return pump;
-}
+/*
 
-function createMultiPump(readables, writables) {
+Experimental
+
+Simplified API for creating a Stream compatible object that can mutate data coming through the stream.
+
+  // Write 4 chunks at a time.
+  var b = [];
+  var filter = sys.createFilter(function (chunk, write) {
+    if (!chunk || b.length === 4) {
+      b.forEach( function (c) {write(c)} );
+    } else {
+      b.push(chunk);
+    }
+  });
+  sys.pump(readable, filter);
+  sys.pump(filter, writable);
+*/
+
+function Filter(handler) {
+  var self = this;
+  var write = function(chunk) {
+    self.emit('data', chunk)
+  }
+
+  self.write = function(chunk) {
+    handler(chunk, write);
+  }
+  self.addListener("end", function() {
+    handler(null, write)
+  })
+};
+Filter.prototype.pause = function() {
+  this.emit("pause")
+}
+Filter.prototype.resume = function() {
+  this.emit("resume")
+}
+sys.inherits(Filter, events.EventEmitter)
+
+function createFilter (handler) {
+  return new Filter(handler);
+};
+
+function createMultiPump (readables, writables) {
   var mpump = new events.EventEmitter();
   
   for (var i;i<readables.length;i+=1) {
@@ -98,5 +105,6 @@ function createMultiPump(readables, writables) {
   return mpump;
 }
 
-exports.createPump = createPump;
+exports.Filter = Filter;
+exports.createFilter = createFilter;
 exports.createMultiPump = createMultiPump;
