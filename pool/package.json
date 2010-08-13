@@ -1,10 +1,8 @@
 { "name" : "pool"
 , "description" : "HTTP client pools."
 , "tags" : ["http", "simple", "util", "utility"]
-, "version" : "0.1.0"
+, "version" : "0.3.0"
 , "author" : "Mikeal Rogers <mikeal.rogers@gmail.com>"
-, "directories" :
-  { "lib" : "lib" }
 , "repository" :
   { "type" : "git"
   , "url" : "http://github.com/mikeal/node-utils.git"
