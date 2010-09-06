@@ -108,7 +108,7 @@ PoolManager.prototype.setMinClients = function (num) {
 PoolManager.prototype.getPool = function (port, host, https, credentials) {
   var k = (port+host+https+credentials);
   if (!this.pools[k]) { 
-    this.pools[k] = createPool(port, host, https, credentials); 
+    this.pools[k] = exports.createPool(port, host, https, credentials); 
     this.pools[k].setMinClients(this.minClients);
     this.pools[k].setMaxClients(this.maxClients);
   }

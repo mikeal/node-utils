@@ -1,7 +1,7 @@
 { "name" : "pool"
 , "description" : "HTTP client pools."
 , "tags" : ["http", "simple", "util", "utility"]
-, "version" : "0.3.0"
+, "version" : "0.4.0"
 , "author" : "Mikeal Rogers <mikeal.rogers@gmail.com>"
 , "repository" :
   { "type" : "git"
