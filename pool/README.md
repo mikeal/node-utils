@@ -3,7 +3,7 @@
 ## Install
 
 <pre>
-  npm install request
+  npm install pool
 </pre>
 
 ## Super simple to use
