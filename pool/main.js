@@ -96,11 +96,13 @@ function PoolManager () {
   this.maxClients = 8;
 }
 PoolManager.prototype.setMaxClients = function (num) {
+  this.maxClients = num;
   for (i in this.pools) {
     this.pools[i].setMaxClients(num);
   }
 }
 PoolManager.prototype.setMinClients = function (num) {
+  this.minClients = num;
   for (i in this.pools) {
     this.pools[i].setMinClients(num);
   }
