@@ -1,6 +1,8 @@
-var request = require('../lib/main'), 
-    sys = require('sys'),
-    assert = require('assert');
+var request = require('../main')
+  , sys = require('sys')
+  , assert = require('assert')
+  , h = {'content-type': 'application/json', 'accept': 'application/json'}
+  ;
 
 function testports (port) {
   var uri = port ? 'http://mikeal.couchone.com' + ":" + port : 'http://mikeal.couchone.com';
@@ -28,14 +30,15 @@ function testportsStream (port) {
 }
 testports();
 var randomnumber=Math.floor(Math.random()*100000000).toString();
-request({uri:'http://mikeal.couchone.com/testjs', method:'POST', body:'{"_id":"'+randomnumber+'"}'}, 
+request({uri:'http://mikeal.couchone.com/testjs', method:'POST', headers: h, body:'{"_id":"'+randomnumber+'"}'}, 
         function (error, response, body) {
           if (error) {throw new Error(error)};
-          assert.equal(response.statusCode, 201);
+          assert.equal(response.statusCode, 201, body);
         });
 
 var options = {uri:'http://gmail.com'};
 request(options, function (error, response, body) {
+  if (error) throw error;
   assert.equal(response.statusCode, 200);
   assert.equal(options.uri.host, 'www.google.com');
   assert.equal(response.socket.port, 443);

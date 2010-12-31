@@ -11,12 +11,16 @@ function request (options, callback) {
   if (!options.uri) {
     throw new Error("options.uri is a required argument")
   } else {
-    if (typeof options.uri == "string") {
-      options.uri = url.parse(options.uri);
-    }
+    if (typeof options.uri == "string") options.uri = url.parse(options.uri);
+  }
+  if (options.proxy) {
+    if (typeof options.proxy == 'string') options.proxy = url.parse(options.proxy);
   }
   
-  options.followRedirect = options.followRedirect ? options.followRedirect : true;
+  options._redirectsFollowed = options._redirectsFollowed ? options._redirectsFollowed : 0;
+  options.maxRedirects = options.maxRedirects ? options.maxRedirects : 10;
+    
+  options.followRedirect = (options.followRedirect !== undefined) ? options.followRedirect : true;
   options.method = options.method ? options.method : 'GET';
   
   options.headers = options.headers ? options.headers :  {};
@@ -38,18 +42,17 @@ function request (options, callback) {
     else if (options.uri.protocol == 'https:') {options.uri.port = 443}
   }
   
-  if (options.uri.protocol == 'https:') {
-    var secure = true; 
-  } else {
-    var secure = false;
-  }
-  
   if (options.bodyStream) {
     sys.error('options.bodyStream is deprecated. use options.reponseBodyStream instead.');
     options.responseBodyStream = options.bodyStream;
   }
-  
-  options.client = options.client ? options.client : http.createClient(options.uri.port, options.uri.hostname, secure);
+  if (options.proxy) {
+    var secure = (options.proxy.protocol == 'https:') ? true : false 
+    options.client = options.client ? options.client : http.createClient(options.proxy.port, options.proxy.hostname, secure);
+  } else {
+    var secure = (options.uri.protocol == 'https:') ? true : false
+    options.client = options.client ? options.client : http.createClient(options.uri.port, options.uri.hostname, secure);
+  }
   
   var clientErrorHandler = function (error) {
     if (setHost) delete options.headers.host;
@@ -60,11 +63,17 @@ function request (options, callback) {
   if (options.uri.auth && !options.headers.authorization) {
     options.headers.authorization = "Basic " + toBase64(options.uri.auth);
   }
+  if (options.proxy && options.proxy.auth && !options.headers['proxy-authorization']) {
+    options.headers['proxy-authorization'] = "Basic " + toBase64(options.proxy.auth);
+  }
+  
   options.fullpath = options.uri.href.replace(options.uri.protocol + '//' + options.uri.host, '');
   if (options.fullpath.length === 0) options.fullpath = '/' 
+  
+  if (options.proxy) options.fullpath = (options.uri.protocol + '//' + options.uri.host + options.fullpath)
+  
   if (options.body) {options.headers['content-length'] = options.body.length}
   options.request = options.client.request(options.method, options.fullpath, options.headers);
-  
   options.request.addListener("response", function (response) {
     var buffer;
     if (options.responseBodyStream) {
@@ -79,7 +88,8 @@ function request (options, callback) {
     response.addListener("end", function () {
       options.client.removeListener("error", clientErrorHandler);
       
-      if (response.statusCode > 299 && response.statusCode < 400 && options.followRedirect && response.headers.location) {
+      if (response.statusCode > 299 && response.statusCode < 400 && options.followRedirect && response.headers.location && (options._redirectsFollowed < options.maxRedirects) ) {
+        options._redirectsFollowed += 1
         options.uri = response.headers.location;
         delete options.client; 
         if (options.headers) {
@@ -87,7 +97,7 @@ function request (options, callback) {
         }
         request(options, callback);
         return;
-      }
+      } else {options._redirectsFollowed = 0}
       
       if (setHost) delete options.headers.host;
       if (callback) callback(null, response, buffer);
@@ -105,3 +115,8 @@ function request (options, callback) {
 }
 
 module.exports = request;
+
+request.get = request;
+request.post = function () {arguments[0].method = 'POST', request.apply(request, arguments)};
+request.put = function () {arguments[0].method = 'PUT', request.apply(request, arguments)};
+request.head = function () {arguments[0].method = 'HEAD', request.apply(request, arguments)};
