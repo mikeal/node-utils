@@ -8,6 +8,12 @@ var toBase64 = function(str) {
 };
 
 function request (options, callback) {
+  if (options.url) {
+    // People use this property instead all the time so why not just support it.
+    options.uri = options.url;
+    delete options.url;
+  }
+  
   if (!options.uri) {
     throw new Error("options.uri is a required argument")
   } else {
@@ -20,7 +26,7 @@ function request (options, callback) {
   options._redirectsFollowed = options._redirectsFollowed ? options._redirectsFollowed : 0;
   options.maxRedirects = options.maxRedirects ? options.maxRedirects : 10;
     
-  options.followRedirect = (options.followRedirect !== undefined) ? options.followRedirect : true;
+  options.followRedirect = (options.followRedirect === undefined) ? true : options.followRedirect;
   options.method = options.method ? options.method : 'GET';
   
   options.headers = options.headers ? options.headers :  {};
@@ -72,10 +78,14 @@ function request (options, callback) {
   
   if (options.proxy) options.fullpath = (options.uri.protocol + '//' + options.uri.host + options.fullpath)
   
-  if (options.body) {options.headers['content-length'] = options.body.length}
+  if (options.body) {
+    options.body = Buffer.isBuffer(options.body) ? options.body : new Buffer(options.body);
+    options.headers['content-length'] = options.body.length;
+  }
   options.request = options.client.request(options.method, options.fullpath, options.headers);
   options.request.addListener("response", function (response) {
     var buffer;
+    if (options.encoding) response.setEncoding(options.encoding);
     if (options.responseBodyStream) {
       buffer = options.responseBodyStream;
       sys.pump(response, options.responseBodyStream);
@@ -88,8 +98,14 @@ function request (options, callback) {
     response.addListener("end", function () {
       options.client.removeListener("error", clientErrorHandler);
       
-      if (response.statusCode > 299 && response.statusCode < 400 && options.followRedirect && response.headers.location && (options._redirectsFollowed < options.maxRedirects) ) {
+      if (response.statusCode > 299 && response.statusCode < 400 && options.followRedirect && response.headers.location) {
+        if (options._redirectsFollowed >= options.maxRedirects) client.emit('error', new Error("Exceeded maxRedirects. Probably stuck in a redirect loop."))
         options._redirectsFollowed += 1
+        if (response.headers.location.slice(0, 'http:'.length) !== 'http:' &&
+            response.headers.location.slice(0, 'https:'.length) !== 'https:'
+            ) {
+          response.headers.location = url.resolve(options.uri.href, response.headers.location);
+        }
         options.uri = response.headers.location;
         delete options.client; 
         if (options.headers) {
