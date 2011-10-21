@@ -18,7 +18,7 @@ Navigates a file tree, calling callback for each directory, passing in (null, di
 Like file.walk but synchronous.
 
 
-### file.mkdirs(path, callback)
+### file.mkdirs(path, mode, callback)
 
 Makes all the directories in a path. (analgous to mkdir -P) For example given a path like "test/this/path" in an empty directory, mkdirs would make the directories "test", "this" and "path".
 
