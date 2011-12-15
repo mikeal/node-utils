@@ -1,6 +1,5 @@
 var path = require('path');
 var fs = require('fs');
-var sys = require('sys');
 
 exports.mkdirs = function (_path, mode, callback) {
   _path = exports.path.abspath(_path);
