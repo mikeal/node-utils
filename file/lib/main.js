@@ -1,6 +1,5 @@
 var path = require('path');
 var fs = require('fs');
-var sys = require('sys');
 
 exports.mkdirs = function (_path, mode, callback) {
   _path = exports.path.abspath(_path);
@@ -20,7 +19,7 @@ exports.mkdirs = function (_path, mode, callback) {
           if (err.errno == 2) {
             fs.mkdir(dir, m, function (erro) {
               if (erro && erro.errno != 17) {
-                sys.p(erro);
+                console.error(erro);
                 return cb(new Error("Failed to make " + dir + "\n" + erro));
               } else {
                 return walk(ds, acc, m, cb);
@@ -55,7 +54,7 @@ exports.mkdirsSync = function (_path, mode) {
   dirs.reduce(function (acc, d) {
     acc.push(d);
     var dir = acc.join("/");
-    
+
     try {
       var stat = fs.statSync(dir);
       if (!stat.isDirectory()) {
