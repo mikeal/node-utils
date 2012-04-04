@@ -73,20 +73,22 @@ exports.walk = function (start, callback) {
     if (stat.isDirectory()) {
 
       fs.readdir(start, function (err, files) {
-        var coll = files.reduce(function (acc, i) {
-          var abspath = path.join(start, i);
+        if (typeof files !== 'undefined') {
+          var coll = files.reduce(function (acc, i) {
+            var abspath = path.join(start, i);
 
-          if (fs.statSync(abspath).isDirectory()) {
-            exports.walk(abspath, callback);
-            acc.dirs.push(abspath);
-          } else {
-            acc.names.push(abspath);
-          }
+            if (fs.statSync(abspath).isDirectory()) {
+              exports.walk(abspath, callback);
+              acc.dirs.push(abspath);
+            } else {
+              acc.names.push(abspath);
+            }
 
-          return acc;
-        }, {"names": [], "dirs": []});
+            return acc;
+          }, {"names": [], "dirs": []});
 
-        return callback(null, start, coll.dirs, coll.names);
+          return callback(null, start, coll.dirs, coll.names);
+        }
       });
     } else {
       return callback(new Error("path: " + start + " is not a directory"));
