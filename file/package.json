@@ -1,7 +1,7 @@
 { "name" : "file"
 , "description" : "Higher level path and file manipulation functions."
 , "tags" : ["file", "path", "fs", "walk"]
-, "version" : "0.1.0"
+, "version" : "0.1.2"
 , "author" : "Anders Conbere <aconbere@gmail.com>"
 , "directories" :
   { "lib" : "lib" }
