@@ -10,7 +10,7 @@
   , "url" : "http://github.com/mikeal/node-utils.git"
   }
 , "bugs" :
-  { "web" : "http://github.com/mikeal/node-utils/issues" }
+  { "url" : "http://github.com/mikeal/node-utils/issues" }
 , "engines" : ["node >=0.1.90"]
 , "main" : "./lib/main"
 }
