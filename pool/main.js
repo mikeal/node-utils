@@ -1,4 +1,4 @@
-var sys = require('sys')
+var util = require('util')
   , http = require('http')
   , events = require('events')
   ;
@@ -13,7 +13,7 @@ function Pool (port, host, https, credentials) {
   this.minClients = 0;
   this.maxClients = 8;
 }
-sys.inherits(Pool, events.EventEmitter);
+util.inherits(Pool, events.EventEmitter);
 Pool.prototype.getClient = function (cb) {
   for (var i=0;i<this.clients.length;i+=1) {
     // Check if the client closed unexpectedly

@@ -1,4 +1,4 @@
-var sys = require('sys')
+var util = require('util')
   , events = require('events');
 
 /*
@@ -9,15 +9,15 @@ Simplified API for creating a Stream compatible object that can mutate data comi
 
   // Write 4 chunks at a time.
   var b = [];
-  var filter = sys.createFilter(function (chunk, write) {
+  var filter = util.createFilter(function (chunk, write) {
     if (!chunk || b.length === 4) {
       b.forEach( function (c) {write(c)} );
     } else {
       b.push(chunk);
     }
   });
-  sys.pump(readable, filter);
-  sys.pump(filter, writable);
+  util.pump(readable, filter);
+  util.pump(filter, writable);
 */
 
 function Filter(handler) {
@@ -39,7 +39,7 @@ Filter.prototype.pause = function() {
 Filter.prototype.resume = function() {
   this.emit("resume")
 }
-sys.inherits(Filter, events.EventEmitter)
+util.inherits(Filter, events.EventEmitter)
 
 function createFilter (handler) {
   return new Filter(handler);

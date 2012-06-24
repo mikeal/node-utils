@@ -1,4 +1,4 @@
-var sys = require("sys");
+var util = require('util');
 var colours = require("./colours");
 
 /* suite */
@@ -9,10 +9,10 @@ function Suite () {
 Suite.prototype.report = function () {
   var suite = this;
   this.contexts.forEach(function(context, index) {
-    sys.puts(context.contextHeader());
+    util.puts(context.contextHeader());
     context.report();
     if (suite.contexts.length === index) {
-      sys.puts("");
+      util.puts("");
     };
   });
 };
@@ -74,9 +74,9 @@ Test.prototype.failed = function (error) {
 
 Test.prototype.report = function () {
   if (this.result) {
-    sys.puts(this.result);
+    util.puts(this.result);
   } else {
-    sys.puts(this.reportNotFinished());
+    util.puts(this.reportNotFinished());
   };
 };
 
@@ -140,7 +140,7 @@ function setupUncaughtExceptionListener () {
   // so we could just set test.result, so everything would be
   // reported properly on the correct place, not in the middle of tests
   process.addListener("uncaughtException", function (error) {
-    sys.puts(Test.prototype.reportError(error));
+    util.puts(Test.prototype.reportError(error));
   });
 };
 
