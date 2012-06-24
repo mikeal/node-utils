@@ -12,14 +12,14 @@ Pool has two core usage scenarios: creating a pool and creating a set of pools. 
 
 <pre>
   var pool = require('pool'),
-      sys = require('sys'),
+      util = require('util'),
       local = pool.createPool('80', 'localhost');
 
   client = local.request('GET', '/', function (request) {
     // You can work with the request here just as you would as if it 
     // was returned from http.createClient
     request.on('end', function () {
-      sys.puts('Request ended');
+      util.puts('Request ended');
     });
   });
 </pre>
@@ -35,7 +35,7 @@ Creating a set of pools can be accomplished using a PoolManager:
     // You can work with the request here just as you would as if it 
     // was returned from http.createClient
     request.on('end', function () {
-      sys.puts('Request ended');
+      util.puts('Request ended');
     });        
   });
 </pre>

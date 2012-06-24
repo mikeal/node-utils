@@ -1,5 +1,5 @@
 var assert = require("assert");
-var sys = require("sys");
+var util = require('util');
 var minitest = require("../vendor/minitest.js/minitest");
 var file = require("../lib/main");
 var fs = require("fs");
