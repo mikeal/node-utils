@@ -15,7 +15,7 @@ Navigates a file tree, calling callback for each directory, passing in (null, di
 
 ### file.walkSync(start, callback)
 
-Like file.walk but synchronous.
+Like file.walk but synchronous, and passing in (currentDirectory, dirs, files).
 
 
 ### file.mkdirs(path, callback)
