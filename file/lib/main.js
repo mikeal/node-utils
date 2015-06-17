@@ -133,6 +133,12 @@ exports.path.abspath = function (to) {
     case "/": from = ""; break
     default : from = process.cwd(); break
   }
+  
+  if(to.charAt(0)+to.charAt(1) == './')
+  {
+    from = ""; to = to.substring(2);
+  }
+    
   return path.join(from, to);
 }
 
