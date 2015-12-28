@@ -33,9 +33,9 @@ Like file.mkdirs but synchronous.
 Expands ".", "..", "~" and non root paths to their full absolute path. Relative paths default to being children of the current working directory.
 
 
-### file.path.relpath(root, fullPath)
+### file.path.relativePath(root, fullPath)
 
-Given a root path, and a fullPath attempts to diff between the two to give us an acurate path relative to root.
+Given a root path, and a fullPath attempts to diff between the two to give us an accurate path relative to root.
 
 
 ### file.path.join(head, tail)
