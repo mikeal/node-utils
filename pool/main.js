@@ -12,8 +12,10 @@ function Pool (port, host, https, credentials) {
   this.pending = [];
   this.minClients = 0;
   this.maxClients = 8;
-}
+};
+
 sys.inherits(Pool, events.EventEmitter);
+
 Pool.prototype.getClient = function (cb) {
   for (var i=0;i<this.clients.length;i+=1) {
     // Check if the client closed unexpectedly
@@ -40,6 +42,7 @@ Pool.prototype.getClient = function (cb) {
     cb(client);
   }
 };
+
 Pool.prototype.request = function () {
   // Argument parsing. This gets a little dicey with the 
   // differences in defaults
@@ -58,11 +61,17 @@ Pool.prototype.request = function () {
   if (!headers.Connection) headers.Connection = 'keep-alive';
   
   self.getClient(function (client) {
-    var request = client.request(method, url, headers);
     var errorListener = function (error) {
+      client.removeListener("error", errorListener);
+      
+      // Remove the client from the available clients since it has errored
+      self.clients.splice(self.clients.indexOf(client), 1);
+      
       self.emit("error", error);
       request.emit("error", error);
-    }
+    };
+    
+    var request = client.request(method, url, headers);
     client.on("error", errorListener);
     request.on("response", function (response) {
       response.on("end", function () {
@@ -75,9 +84,11 @@ Pool.prototype.request = function () {
     callback(request);
   });
 };
+
 Pool.prototype.onFree = function (client) {
   if (this.pending.length > 0) this.pending.shift()(client);
 };
+
 Pool.prototype.setMinClients = function (num) {
   this.minClients = num;
   if (this.clients.length < num) {
@@ -87,7 +98,8 @@ Pool.prototype.setMinClients = function (num) {
       this.emit('free', client);
     }
   }
-}
+};
+
 Pool.prototype.setMaxClients = function (num) {
   this.maxClients = num;
 };
@@ -100,19 +112,22 @@ function PoolManager () {
   this.pending = [];
   this.minClients = 0;
   this.maxClients = 8;
-}
+};
+
 PoolManager.prototype.setMaxClients = function (num) {
   this.maxClients = num;
   for (i in this.pools) {
     this.pools[i].setMaxClients(num);
   }
-}
+};
+
 PoolManager.prototype.setMinClients = function (num) {
   this.minClients = num;
   for (i in this.pools) {
     this.pools[i].setMinClients(num);
   }
-}
+};
+
 PoolManager.prototype.getPool = function (port, host, https, credentials) {
   var k = (port+host+https+credentials);
   if (!this.pools[k]) { 
@@ -121,11 +136,12 @@ PoolManager.prototype.getPool = function (port, host, https, credentials) {
     this.pools[k].setMaxClients(this.maxClients);
   }
   return this.pools[k];
-}
+};
 
 exports.createPool = function (port, host, https, credentials) {
   return new Pool(port, host, https, credentials);
-}
+};
+
 exports.createPoolManager = function () {
   return new PoolManager();
-}
+};
